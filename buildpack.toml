@@ -1,0 +1,11 @@
+[buildpack]
+name = "varnish-buildpack"
+
+    [publish.Ignore]
+    files = [
+        ".github/",
+        "test/",
+        ".gitignore",
+        "Dockerfile",
+        "run_tests.sh",
+    ]

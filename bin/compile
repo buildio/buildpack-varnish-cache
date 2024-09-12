@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+unset GIT_DIR
+
+BUILD_DIR=$1
+CACHE_DIR=$2
+ENV_DIR=$3
+BUILDPACK_DIR="$(dirname "$(dirname "$0")")"
+
+VARNISH_VERSION=7.5
+
+CACHED_BUILD_DIR=$CACHE_DIR/varnish-$VARNISH_VERSION
+
+log() {
+  echo "-----> $@"
+}
+
+indent() {
+  sed 's/^/       /'
+}
+
+apt-get update 2>&1 | indent
+apt-get install -y lsof 2>&1 | indent
+
+if [ -d $CACHED_BUILD_DIR ]; then
+  log "Using cached Varnish $VARNISH_VERSION build from $CACHED_BUILD_DIR"
+else
+  log "Installing dependencies"
+  apt-get install -y \
+      make \
+      automake \
+      autotools-dev \
+      libedit-dev \
+      libjemalloc-dev \
+      libncurses-dev \
+      libpcre2-dev \
+      libtool \
+      pkg-config \
+      python3-docutils \
+      python3-sphinx \
+      cpio 2>&1 | indent
+
+  log "Installing Varnish $VARNISH_VERSION"
+
+  log "Cloning Varnish from GitHub"
+  git clone https://github.com/varnishcache/varnish-cache 2>&1 | indent
+
+  pushd varnish-cache > /dev/null
+  git checkout $VARNISH_VERSION 2>&1 | indent
+
+  log "Configuring Varnish"
+  ./autogen.sh 2>&1 | indent
+  ./configure --prefix=/app/vendor/varnish 2>&1 | indent
+  log "Building Varnish"
+  make 2>&1 | indent
+  log "Installing Varnish"
+  DESTDIR=$CACHED_BUILD_DIR make install 2>&1 | indent
+
+  popd > /dev/null
+
+  rm -rf varnish-cache
+fi
+
+mkdir -p $BUILD_DIR/.profile.d 2>&1 | indent
+
+echo 'export PATH="/app/vendor/varnish/bin:$PATH"' > $BUILD_DIR/.profile.d/varnish-buildpack.sh 2>&1 | indent
+echo 'export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/app/vendor/varnish/lib"' >> $BUILD_DIR/.profile.d/varnish-buildpack.sh 2>&1 | indent
+echo ". /app/vendor/varnish/varnish-start.sh" >> $BUILD_DIR/.profile.d/varnish-buildpack.sh 2>&1 | indent
+
+mkdir -p $BUILD_DIR/vendor/varnish 2>&1 | indent
+cp $BUILDPACK_DIR/bin/varnish-start.sh $BUILD_DIR/vendor/varnish/varnish-start.sh 2>&1 | indent
+chmod +x $BUILD_DIR/vendor/varnish/varnish-start.sh 2>&1 | indent
+
+pushd $CACHED_BUILD_DIR/app > /dev/null
+cp -rv ./ $BUILD_DIR 2>&1 | indent
+popd > /dev/null
