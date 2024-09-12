@@ -1,5 +1,5 @@
 [buildpack]
-name = "varnish-buildpack"
+name = "buildpack-varnish-cache"
 
     [publish.Ignore]
     files = [
