@@ -20,6 +20,8 @@ done
 
 # Run Varnish on the Heroku-assigned port ($PORT) and forward traffic to $APP_PORT
 /app/vendor/varnish/sbin/varnishd -a :$PORT -b 127.0.0.1:$APP_PORT -n /tmp/varnish
+# Output varnish logs to stdout
+/app/vendor/varnish/bin/varnishncsa -n /tmp/varnish &
 
 # Export the new port for the app to use
 export PORT=$APP_PORT
