@@ -2,12 +2,7 @@
 
 # Function to check if a port is in use
 is_port_in_use() {
-    local port=$1
-    if lsof -i :$port >/dev/null; then
-        return 0  # Port is in use
-    else
-        return 1  # Port is available
-    fi
+  (echo > /dev/tcp/127.0.0.1/$1) &>/dev/null
 }
 
 PORT=${PORT:-8080}

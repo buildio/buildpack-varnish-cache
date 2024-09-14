@@ -21,26 +21,26 @@ indent() {
   sed 's/^/       /'
 }
 
-apt-get update 2>&1 | indent
-apt-get install -y lsof 2>&1 | indent
+#apt-get update 2>&1 | indent
+#apt-get install -y lsof 2>&1 | indent
 
 if [ -d $CACHED_BUILD_DIR ]; then
   log "Using cached Varnish $VARNISH_VERSION build from $CACHED_BUILD_DIR"
 else
   log "Installing dependencies"
-  apt-get install -y \
-      make \
-      automake \
-      autotools-dev \
-      libedit-dev \
-      libjemalloc-dev \
-      libncurses-dev \
-      libpcre2-dev \
-      libtool \
-      pkg-config \
-      python3-docutils \
-      python3-sphinx \
-      cpio 2>&1 | indent
+#  apt-get install -y \
+#      make \
+#      automake \
+#      autotools-dev \
+#      libedit-dev \
+#      libjemalloc-dev \
+#      libncurses-dev \
+#      libpcre2-dev \
+#      libtool \
+#      pkg-config \
+#      python3-docutils \
+#      python3-sphinx \
+#      cpio 2>&1 | indent
 
   log "Installing Varnish $VARNISH_VERSION"
 
@@ -52,11 +52,14 @@ else
 
   log "Configuring Varnish"
   ./autogen.sh 2>&1 | indent
-  ./configure --prefix=/app/vendor/varnish 2>&1 | indent
+  ./configure --prefix=/app/vendor/varnish --with-rst2man=/bin/true --with-sphinx-build=/bin/true --with-rst2html=/bin/true 2>&1 | indent
   log "Building Varnish"
   make 2>&1 | indent
   log "Installing Varnish"
+  # We don't care if the install fails due to being unable to build the docs
+  set +e
   DESTDIR=$CACHED_BUILD_DIR make install 2>&1 | indent
+  set -e
 
   popd > /dev/null
 
