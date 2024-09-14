@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# If /tmp/varnish already exists, this script has already been run
+if [ -d /tmp/varnish ]; then
+  exit 0
+fi
+
 # Function to check if a port is in use
 is_port_in_use() {
   (echo > /dev/tcp/127.0.0.1/$1) &>/dev/null
