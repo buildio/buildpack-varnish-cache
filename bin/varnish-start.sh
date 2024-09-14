@@ -14,7 +14,7 @@ while is_port_in_use $APP_PORT || [ "$APP_PORT" -eq "$PORT" ]; do
 done
 
 # Run Varnish on the Heroku-assigned port ($PORT) and forward traffic to $APP_PORT
-/app/vendor/varnish/sbin/varnishd -a :$PORT -b 127.0.0.1:$APP_PORT
+/app/vendor/varnish/sbin/varnishd -a :$PORT -b 127.0.0.1:$APP_PORT -n /tmp/varnish
 
 # Export the new port for the app to use
 export PORT=$APP_PORT
