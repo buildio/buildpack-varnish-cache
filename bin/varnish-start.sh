@@ -29,7 +29,7 @@ else
   /app/vendor/varnish/sbin/varnishd -a :$PORT -b 127.0.0.1:$APP_PORT -n /tmp/varnish
   
   # Output varnish logs to stdout
-  LOG_FORMAT='at=info method=%m path="%U" host=%{Host}i request_id=%{X-Request-Id}i fwd="%h" service=%Dms status=%s bytes=%b protocol=%H cache=%{Varnish:hitmiss}x'
+  LOG_FORMAT='at=info method=%m path="%U" host=%{Host}i request_id=%{X-Request-Id}i fwd="%h" service=%Dµs status=%s bytes=%b protocol=%H cache=%{Varnish:hitmiss}x'
   /app/vendor/varnish/bin/varnishncsa -F "$LOG_FORMAT" -n /tmp/varnish &
 
   # Export the new port for the app to use
